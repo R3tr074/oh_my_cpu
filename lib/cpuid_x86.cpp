@@ -84,6 +84,9 @@ int main(int argc, char *argv[]) {
   if (argc == 2 && strncmp(argv[1], "--compile-all", 14) == 0) {
     compile_all = true;
   }
+  // flags
+  string cFlags = getenv("CFLAGS") == NULL ? "" : getenv("CFLAGS");
+  string asFlags = getenv("ASFLAGS") == NULL ? "" : getenv("ASFLAGS");
 
   // assembly files
   string avx512f = "binary/cpu_kernel_x86_avx512f.asm";
@@ -92,10 +95,10 @@ int main(int argc, char *argv[]) {
   string avx = "binary/cpu_kernel_x86_avx.asm";
   string sse = "binary/cpu_kernel_x86_sse.asm";
 
-  string smtl_cmd = "gcc -pthread -O3 -c lib/smtl.c\n";
+  string smtl_cmd = "gcc " + cFlags + " -pthread -O3 -c lib/smtl.c\n";
   string asm_cmd = "";
-  string c_cmd = "gcc -pthread ";
-  string lnk_cmd = "gcc -pthread -lrt smtl.o cpu_x86.o";
+  string c_cmd = "gcc " + cFlags + " -pthread ";
+  string lnk_cmd = "gcc " + cFlags + " -pthread -lrt smtl.o cpu_x86.o";
 
   string isa_macro = "";
 
@@ -103,35 +106,35 @@ int main(int argc, char *argv[]) {
     string out = "cpu_kernel_x86_avx512f.o";
     isa_macro += "-D_AVX512F_ ";
 
-    asm_cmd += "as -o " + out + " " + avx512f + "\n";
+    asm_cmd += "as " + asFlags + "-o " + out + " " + avx512f + "\n";
     lnk_cmd += " " + out;
   }
   if (cpuid_x86_support(_CPUID_X86_AVX512_VNNI_) || compile_all) {
     string out = "cpu_kernel_x86_avx512_vnni.o";
     isa_macro += "-D_AVX512_VNNI_ ";
 
-    asm_cmd += "as -o " + out + " " + avx512_vnni + "\n";
+    asm_cmd += "as " + asFlags + "-o " + out + " " + avx512_vnni + "\n";
     lnk_cmd += " " + out;
   }
   if (cpuid_x86_support(_CPUID_X86_FMA_) || compile_all) {
     string out = "cpu_kernel_x86_fma.o";
     isa_macro += "-D_FMA_ ";
 
-    asm_cmd += "as -o " + out + " " + fma + "\n";
+    asm_cmd += "as " + asFlags + "-o " + out + " " + fma + "\n";
     lnk_cmd += " " + out;
   }
   if (cpuid_x86_support(_CPUID_X86_AVX_) || compile_all) {
     string out = "cpu_kernel_x86_avx.o";
     isa_macro += "-D_AVX_ ";
 
-    asm_cmd += "as -o " + out + " " + avx + "\n";
+    asm_cmd += "as " + asFlags + "-o " + out + " " + avx + "\n";
     lnk_cmd += " " + out;
   }
   if (cpuid_x86_support(_CPUID_X86_SSE_) || compile_all) {
     string out = "cpu_kernel_x86_sse.o";
     isa_macro += "-D_SSE_ ";
 
-    asm_cmd += "as -o " + out + " " + sse + "\n";
+    asm_cmd += "as " + asFlags + "-o " + out + " " + sse + "\n";
     lnk_cmd += " " + out;
   }
 
