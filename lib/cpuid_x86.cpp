@@ -1,3 +1,7 @@
+#include <libgen.h>
+#include <stdio.h>
+#include <unistd.h>
+
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -78,6 +82,9 @@ unsigned int cpuid_x86_support(cpuid_x86_feature_t feature) {
 
 int main(int argc, char *argv[]) {
   cpuid_x86_init();
+  char *pwd = dirname(argv[0]);
+  std::string string_pwd(pwd);
+  chdir(pwd);
 
   bool compile_all = false;
 
@@ -89,17 +96,23 @@ int main(int argc, char *argv[]) {
   string asFlags = getenv("ASFLAGS") == NULL ? "" : getenv("ASFLAGS");
 
   // assembly files
-  string avx512f = "binary/cpu_kernel_x86_avx512f.asm";
-  string avx512_vnni = "binary/cpu_kernel_x86_avx512_vnni.asm";
-  string fma = "binary/cpu_kernel_x86_fma.asm";
-  string avx = "binary/cpu_kernel_x86_avx.asm";
-  string sse = "binary/cpu_kernel_x86_sse.asm";
+  string avx512f = string_pwd + "/binary/cpu_kernel_x86_avx512f.asm";
+  string avx512_vnni = string_pwd + "/binary/cpu_kernel_x86_avx512_vnni.asm";
+  string fma = string_pwd + "/binary/cpu_kernel_x86_fma.asm";
+  string avx = string_pwd + "/binary/cpu_kernel_x86_avx.asm";
+  string sse = string_pwd + "/binary/cpu_kernel_x86_sse.asm";
 
-  string smtl_cmd = "gcc " + cFlags + " -pthread -O3 -c lib/smtl.c\n";
+  // libs
+  string libc = string_pwd + "/lib/*.c";
+  string libo = string_pwd + "/*.o";
+  string headers = "-lm -I " + string_pwd + "/include";
+
+  string smtl_cmd =
+      "gcc " + cFlags + " -pthread -O3 -c " + libc + " " + headers + "\n";
   string asm_cmd = "";
-  string c_cmd = "gcc " + cFlags + " -pthread ";
-  // "$1" is the name of the binary that is passed in the Makefile
-  string lnk_cmd = "gcc " + cFlags + " -pthread -lrt smtl.o cpu_x86.o -o $1";
+  string c_cmd = "gcc " + cFlags + " -pthread " + headers + " ";
+  string lnk_cmd =
+      "gcc " + cFlags + " -pthread -lrt " + headers + " " + libo + " -o $1";
 
   string isa_macro = "";
 
@@ -107,36 +120,31 @@ int main(int argc, char *argv[]) {
     string out = "cpu_kernel_x86_avx512f.o";
     isa_macro += "-D_AVX512F_ ";
 
-    asm_cmd += "as " + asFlags + "-o " + out + " " + avx512f + "\n";
-    lnk_cmd += " " + out;
+    asm_cmd += "as " + asFlags + " -o " + out + " " + avx512f + "\n";
   }
   if (cpuid_x86_support(_CPUID_X86_AVX512_VNNI_) || compile_all) {
     string out = "cpu_kernel_x86_avx512_vnni.o";
     isa_macro += "-D_AVX512_VNNI_ ";
 
-    asm_cmd += "as " + asFlags + "-o " + out + " " + avx512_vnni + "\n";
-    lnk_cmd += " " + out;
+    asm_cmd += "as " + asFlags + " -o " + out + " " + avx512_vnni + "\n";
   }
   if (cpuid_x86_support(_CPUID_X86_FMA_) || compile_all) {
     string out = "cpu_kernel_x86_fma.o";
     isa_macro += "-D_FMA_ ";
 
-    asm_cmd += "as " + asFlags + "-o " + out + " " + fma + "\n";
-    lnk_cmd += " " + out;
+    asm_cmd += "as " + asFlags + " -o " + out + " " + fma + "\n";
   }
   if (cpuid_x86_support(_CPUID_X86_AVX_) || compile_all) {
     string out = "cpu_kernel_x86_avx.o";
     isa_macro += "-D_AVX_ ";
 
-    asm_cmd += "as " + asFlags + "-o " + out + " " + avx + "\n";
-    lnk_cmd += " " + out;
+    asm_cmd += "as " + asFlags + " -o " + out + " " + avx + "\n";
   }
   if (cpuid_x86_support(_CPUID_X86_SSE_) || compile_all) {
     string out = "cpu_kernel_x86_sse.o";
     isa_macro += "-D_SSE_ ";
 
-    asm_cmd += "as " + asFlags + "-o " + out + " " + sse + "\n";
-    lnk_cmd += " " + out;
+    asm_cmd += "as " + asFlags + " -o " + out + " " + sse + "\n";
   }
 
   c_cmd += (isa_macro + "-c lib/cpu_x86.c\n");
