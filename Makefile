@@ -13,8 +13,7 @@ all: build gen clean
 compile-all: build gen-all clean
 
 build:
-	$(g++) -O3 -c $(cpuid)
-	$(g++) -O3 -o cpuid_x86 cpuid_x86.o
+	$(g++) -O3 -o cpuid_x86 $(cpuid)
 
 gen:
 	./cpuid_x86 > gen.sh
