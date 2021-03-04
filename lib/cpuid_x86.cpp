@@ -98,7 +98,8 @@ int main(int argc, char *argv[]) {
   string smtl_cmd = "gcc " + cFlags + " -pthread -O3 -c lib/smtl.c\n";
   string asm_cmd = "";
   string c_cmd = "gcc " + cFlags + " -pthread ";
-  string lnk_cmd = "gcc " + cFlags + " -pthread -lrt smtl.o cpu_x86.o";
+  // "$1" is the name of the binary that is passed in the Makefile
+  string lnk_cmd = "gcc " + cFlags + " -pthread -lrt smtl.o cpu_x86.o -o $1";
 
   string isa_macro = "";
 

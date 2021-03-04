@@ -18,13 +18,11 @@ build:
 
 gen:
 	./cpuid_x86 > gen.sh
-	$(SHELL) ./gen.sh
-	mv a.out $(NAME)
+	$(SHELL) ./gen.sh $(NAME)
 
 gen-all:
 	./cpuid_x86 --compile-all > gen.sh
-	$(SHELL) ./gen.sh
-	mv a.out $(NAME)
+	$(SHELL) ./gen.sh $(NAME)
 
 clean:
 	$(RM) $(TRASH)
