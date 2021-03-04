@@ -1,4 +1,4 @@
-#include "../include/cpu_x86.h"
+#include "cpu_x86.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -6,8 +6,8 @@
 #include <sys/sysinfo.h>
 #include <time.h>
 
-#include "../include/cpu_kernel_x86.h"
-#include "../include/smtl.h"
+#include "cpu_kernel_x86.h"
+#include "smtl.h"
 
 static double get_time(struct timespec *start, struct timespec *end) {
   return end->tv_sec - start->tv_sec + (end->tv_nsec - start->tv_nsec) * 1e-9;

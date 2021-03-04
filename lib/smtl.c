@@ -1,6 +1,6 @@
 #define _GNU_SOURCE
 
-#include "../include/smtl.h"
+#include "smtl.h"
 
 #include <pthread.h>
 #include <sched.h>
