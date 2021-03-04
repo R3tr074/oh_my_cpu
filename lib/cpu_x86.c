@@ -331,18 +331,11 @@ void cpu_x86_sse(int num_threads) {
 }
 #endif
 
-int main(int argc, char *argv[]) {
+void benchmark(int num_threads) {
   printf(
       "This system has %d processors configured and "
       "%d processors available.\n",
       get_nprocs_conf(), get_nprocs());
-  int num_threads;
-
-  if (argc != 2) {
-    num_threads = get_nprocs();
-  } else {
-    num_threads = atoi(argv[1]);
-  }
 
   printf(
       "Using "
@@ -371,6 +364,4 @@ int main(int argc, char *argv[]) {
 #ifdef _SSE_
   cpu_x86_sse(num_threads);
 #endif
-
-  return 0;
 }
